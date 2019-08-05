@@ -22,6 +22,7 @@ chmod 600 key.pem
 [ -f tcp443.conf ] || cat >tcp443.conf <<EOF
 server 192.168.255.0 255.255.255.128
 client-to-client
+client-config-dir /etc/openvpn/ccd
 verb 3
 duplicate-cn
 key key.pem
@@ -43,6 +44,7 @@ EOF
 [ -f udp1194.conf ] || cat >udp1194.conf <<EOF
 server 192.168.255.128 255.255.255.128
 client-to-client
+client-config-dir /etc/openvpn/ccd
 verb 3
 duplicate-cn
 key key.pem
