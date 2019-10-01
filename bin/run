@@ -71,6 +71,7 @@ MY_IP_ADDR=$(curl -s http://myip.enix.org/REMOTE_ADDR)
 }
 
 [ -f client.ovpn ] || cat >client.ovpn <<EOF
+#universal
 client
 nobind
 dev tun
@@ -98,12 +99,50 @@ remote $MY_IP_ADDR 443 tcp-client
 </connection>
 EOF
 
+for f in ccd; do
+	if [ ! -f $f".ovpn" ]; then
+		echo "create sert for " $f
+		openssl dhparam -out $f"dh.pem" 1024
+		openssl genrsa -out $f"key.pem" 2048
+		openssl req -new -key $f"key.pem" -out $f"csr.pem" -subj /CN=$f/
+		openssl x509 -req -in $f"csr.pem" -out $f"cert.pem" -CAkey key.pem -CA ca.pem -CAcreateserial -days 24855
+		cat >$f".ovpn" <<EOF
+#`echo $f`
+client
+nobind
+dev tun
+#redirect-gateway def1
+
+<key>
+`cat $f"key.pem"`
+</key>
+<cert>
+`cat $f"cert.pem"`
+</cert>
+<ca>
+`cat cert.pem`
+</ca>
+<dh>
+`cat $f"dh.pem"`
+</dh>
+
+<connection>
+remote $MY_IP_ADDR 1194 udp
+</connection>
+
+<connection>
+remote $MY_IP_ADDR 443 tcp-client
+</connection>
+EOF
+	fi
+done
+
 [ -f client.http ] || cat >client.http <<EOF
 HTTP/1.0 200 OK
 Content-Type: application/x-openvpn-profile
 Content-Length: `wc -c client.ovpn`
 
-`cat client.ovpn`
+`cat *.ovpn`
 EOF
 
 iptables -t nat -A POSTROUTING -s 192.168.255.0/24 -o eth0 -j MASQUERADE
