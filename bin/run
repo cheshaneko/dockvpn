@@ -99,13 +99,13 @@ remote $MY_IP_ADDR 443 tcp-client
 </connection>
 EOF
 
-for f in ccd; do
+for f in `ls ccd`; do
 	if [ ! -f $f".ovpn" ]; then
 		echo "create sert for " $f
 		openssl dhparam -out $f"dh.pem" 1024
 		openssl genrsa -out $f"key.pem" 2048
 		openssl req -new -key $f"key.pem" -out $f"csr.pem" -subj /CN=$f/
-		openssl x509 -req -in $f"csr.pem" -out $f"cert.pem" -CAkey key.pem -CA ca.pem -CAcreateserial -days 24855
+		openssl x509 -req -in $f"csr.pem" -out $f"cert.pem" -CAkey key.pem -CA cert.pem -CAcreateserial -days 24855
 		cat >$f".ovpn" <<EOF
 #`echo $f`
 client
