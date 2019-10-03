@@ -34,6 +34,8 @@ persist-key
 persist-tun
 push "dhcp-option DNS 8.8.8.8"
 push "dhcp-option DNS 8.8.4.4"
+#docker network
+push "route 172.28.5.0 255.255.255.0"
 
 proto tcp-server
 port 444
