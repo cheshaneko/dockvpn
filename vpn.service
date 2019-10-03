@@ -1,0 +1,12 @@
+[Unit]
+After=Network.target
+
+[Service]
+Type=simple
+RemainAfterExit=yes
+WorkingDirectory=/home/mylogin/vpn
+ExecStart=openvpn laptop.ovpn
+
+[Install]
+WantedBy=multi-user.target
+

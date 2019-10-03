@@ -117,7 +117,7 @@ Content-Length: `wc -c client.ovpn`
 `cat *.ovpn`
 EOF
 
-#iptables -t nat -A POSTROUTING -s 192.168.255.0/24 -o eth0 -j MASQUERADE
+iptables -t nat -A POSTROUTING -s 10.8.0.0/24 -o eth0 -j MASQUERADE
 
 touch tcp444.log http8080.log
 while true ; do openvpn tcp444.conf ; done >> tcp444.log &
