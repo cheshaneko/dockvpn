@@ -20,7 +20,7 @@ chmod 600 key.pem
     openssl x509 -req -in csr.pem -out cert.pem -signkey key.pem -days 24855
 
 [ -f tcp444.conf ] || cat >tcp444.conf <<EOF
-server 192.168.255.0 255.255.255.128
+server 10.8.0.0 255.255.255.0
 client-to-client
 client-config-dir /etc/openvpn/ccd
 verb 3
@@ -39,28 +39,6 @@ proto tcp-server
 port 444
 dev tun444
 status openvpn-status-444.log
-EOF
-
-[ -f udp1194.conf ] || cat >udp1194.conf <<EOF
-server 192.168.255.128 255.255.255.128
-client-to-client
-client-config-dir /etc/openvpn/ccd
-verb 3
-duplicate-cn
-key key.pem
-ca cert.pem
-cert cert.pem
-dh dh.pem
-keepalive 10 60
-persist-key
-persist-tun
-push "dhcp-option DNS 8.8.8.8"
-push "dhcp-option DNS 8.8.4.4"
-
-proto udp
-port 1194
-dev tun1194
-status openvpn-status-1194.log
 EOF
 
 MY_IP_ADDR=$(curl -s http://myip.enix.org/REMOTE_ADDR)
@@ -89,10 +67,6 @@ dev tun
 <dh>
 `cat dh.pem`
 </dh>
-
-<connection>
-remote $MY_IP_ADDR 1194 udp
-</connection>
 
 <connection>
 remote $MY_IP_ADDR 444 tcp-client
@@ -127,10 +101,6 @@ dev tun
 </dh>
 
 <connection>
-remote $MY_IP_ADDR 1194 udp
-</connection>
-
-<connection>
 remote $MY_IP_ADDR 444 tcp-client
 </connection>
 EOF
@@ -145,9 +115,8 @@ Content-Length: `wc -c client.ovpn`
 `cat *.ovpn`
 EOF
 
-iptables -t nat -A POSTROUTING -s 192.168.255.0/24 -o eth0 -j MASQUERADE
+#iptables -t nat -A POSTROUTING -s 192.168.255.0/24 -o eth0 -j MASQUERADE
 
-touch tcp444.log udp1194.log http8080.log
+touch tcp444.log http8080.log
 while true ; do openvpn tcp444.conf ; done >> tcp444.log &
-while true ; do openvpn udp1194.conf ; done >> udp1194.log &
 tail -F *.log
