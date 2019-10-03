@@ -13,7 +13,7 @@ docker run -t -i -p 8080:8080 --volumes-from $CID vpn serveconfig
 
 Client certificate creation:
 
-ser_key.pem  ser_ca.pem from vpn server
+ser_key.pem  ser_ca.pem is key.pem and cert.pem from vpn server
 
 ```bash
 openssl dhparam -out dh.pem 1024
@@ -22,7 +22,7 @@ openssl req -new -key key.pem -out csr.pem -subj /CN=laptop/
 openssl x509 -req -in csr.pem -out cert.pem -CAkey ser_key.pem -CA ser_ca.pem -CAcreateserial -days 24855
 ```
 
-Create dokcer network and route container via vpn
+Create docker network and route container via vpn
 
 ```bash
 docker network create \
@@ -32,8 +32,10 @@ docker network create \
                 --gateway=172.28.5.254 \
                 br0
 
+#connect conteiner to the network
 docker network connect br0 conteiner_id
 
+#create route for nginx conteiner 
 nsenter -n -t $(docker inspect --format {{.State.Pid}} conteiner_id) ip route add 10.8.0.0/24 via 172.28.5.0 dev eth1
 ```
 
