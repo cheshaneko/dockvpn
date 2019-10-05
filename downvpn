@@ -1,2 +1,2 @@
 #!/bin/bash
-ip route del `ip route | grep 0.0.0.0`
+ip route del `ip route | grep ^0.0.0.0`
